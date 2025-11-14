@@ -10,6 +10,7 @@ lib/glad.c
 src/shader.hpp
 src/vertex.glsl
 src/fragment.glsl
+lib/stb_image.h
 )
 
 target_link_libraries(first_opengl 

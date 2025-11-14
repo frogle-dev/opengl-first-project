@@ -1,4 +1,6 @@
 #include "../lib/glad.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "../lib/stb_image.h"
 #include <GLFW/glfw3.h>
 
 #include "shader.hpp"
@@ -8,6 +10,7 @@
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
+void generateTexture(const char* path, unsigned int &id);
 
 
 int main()
@@ -18,7 +21,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     
-    GLFWwindow* window = glfwCreateWindow(640, 360, "First OpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "First OpenGL", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -35,6 +38,9 @@ int main()
     }
 
     // rendering stuff
+    unsigned int texture;
+    generateTexture("../images/wordle_in_2.png", texture);
+
     Shader shader("/home/jonah/Programming/Opengl/opengl-first-project/src/vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/src/fragment.glsl");
 
     float vertices[] = {
@@ -42,6 +48,11 @@ int main()
         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,// bottom right
         -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f, // bottom left
         -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f// top left 
+    };
+    float texCoords[] = {
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        0.5f, 1.0f
     };
     unsigned int indices[] = {
         0, 1, 3, // first triangle of rectangle
@@ -125,4 +136,28 @@ void processInput(GLFWwindow* window)
     {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
+}
+
+void generateTexture(const char* path, unsigned int &id)
+{
+    glGenTextures(1, &id);
+    glBindTexture(GL_TEXTURE_2D, id);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    int width, height, nrChannels;
+    unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
 }
