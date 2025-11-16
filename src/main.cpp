@@ -25,7 +25,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "First OpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(600, 600, "First OpenGL", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -116,7 +116,6 @@ int main()
         {
             glm::mat4 trans = glm::mat4(1.0f);
             trans = glm::translate(trans, glm::vec3(0.5f * sin((float)glfwGetTime() + (2 * M_PI * i/(float)objs)), 0.5f * cos((float)glfwGetTime() + (2 * M_PI * i/(float)objs)), 0.0f));
-            trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
             trans = glm::scale(trans, glm::vec3(0.25f, 0.25f, 0.25f));
             glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
     
