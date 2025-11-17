@@ -92,7 +92,9 @@ int main()
     shader.setInt("texture1", 0);
     shader.setInt("texture2", 1);
 
-    unsigned int transformLoc = glGetUniformLocation(shader.shaderProgramID, "transform");
+    unsigned int modelLoc = glGetUniformLocation(shader.shaderProgramID, "model");
+    unsigned int viewLoc = glGetUniformLocation(shader.shaderProgramID, "view");
+    unsigned int projectionLoc = glGetUniformLocation(shader.shaderProgramID, "projection");
 
     // render loop
     while(!glfwWindowShouldClose(window))
@@ -111,16 +113,20 @@ int main()
 
         glBindVertexArray(VAO);
 
-        int objs = 10;
-        for (int i = 0; i < objs; i++)
-        {
-            glm::mat4 trans = glm::mat4(1.0f);
-            trans = glm::translate(trans, glm::vec3(0.5f * sin((float)glfwGetTime() + (2 * M_PI * i/(float)objs)), 0.5f * cos((float)glfwGetTime() + (2 * M_PI * i/(float)objs)), 0.0f));
-            trans = glm::scale(trans, glm::vec3(0.25f, 0.25f, 0.25f));
-            glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
-    
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        }
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+        glm::mat4 view = glm::mat4(1.0f);
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+        glm::mat4 projection;
+        projection = glm::perspective(glm::radians(45.0f), 600.0f / 600.0f, 0.1f, 100.0f);
+
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
