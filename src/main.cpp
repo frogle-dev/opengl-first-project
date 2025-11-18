@@ -8,20 +8,29 @@
 
 #include "shader.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void processInput(GLFWwindow* window);
 void generateTexture(const char* path, unsigned int &id, bool RGBA);
 
+
+const unsigned int screenWidth = 1280, screenHeight = 720;
 
 float deltaTime = 0.0f;
 
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+
+float lastMouseX = screenWidth/2, lastMouseY = screenHeight/2;
+float yaw = -90.0f;
+float pitch = 0.0f;
 
 int main()
 {
@@ -31,7 +40,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "First OpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "First OpenGL", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -40,6 +49,9 @@ int main()
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -166,6 +178,12 @@ int main()
         glBindVertexArray(VAO);
 
 
+        glm::vec3 direction;
+        direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        direction.y = sin(glm::radians(pitch));
+        direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        cameraFront = glm::normalize(direction);
+
         glm::mat4 view = glm::mat4(1.0f);
         view = glm::lookAt(
             cameraPos,
@@ -174,21 +192,24 @@ int main()
         );
 
         glm::mat4 projection;
-        projection = glm::perspective(glm::radians(45.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(95.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
 
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
 
-        for (unsigned int x = 0; x < 10; x++)
+        for (unsigned int x = 0; x < 16; x++)
         {
-            for (unsigned int y = 0; y < 10; y++)
+            for (unsigned int y = 0; y < 100; y++)
             {
-                glm::mat4 model = glm::mat4(1.0f);
-                model = glm::translate(model, glm::vec3(1.0f * x, 1.0f * y, 0.0f));
+                for (unsigned int z = 0; z < 16; z++)
+                {
+                    glm::mat4 model = glm::mat4(1.0f);
+                    model = glm::translate(model, glm::vec3(1.0f * x, -1.0f * y, -1.0f * z));
 
-                shader.setMat4("model", model);
+                    shader.setMat4("model", model);
 
-                glDrawArrays(GL_TRIANGLES, 0, 36);
+                    glDrawArrays(GL_TRIANGLES, 0, 36);
+                }
             }
         }
     //    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -211,11 +232,41 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0,0,width,height);
 }
 
+bool firstMouse = true;
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    if (firstMouse)
+    {
+        lastMouseX = xpos;
+        lastMouseY = ypos;
+        firstMouse = false;
+    } // this is so when mouse initially moves, it doesnt make a large jkittery motion to that position
+
+    float xOffset = xpos - lastMouseX;
+    float yOffset = lastMouseY - ypos;
+    lastMouseX = xpos;
+    lastMouseY = ypos;
+
+    const float sensitivity = 0.1f;
+    xOffset *= sensitivity;
+    yOffset *= sensitivity;
+
+    yaw += xOffset;
+    pitch += yOffset;
+
+    pitch = std::clamp(pitch, -89.0f, 89.0f);
+}
+
 void processInput(GLFWwindow* window)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
-        glfwSetWindowShouldClose(window, true);
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+
+    if(glfwGetKey(window, GLFW_KEY_SEMICOLON) == GLFW_PRESS)
+    {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 
     bool wireframe = false;
@@ -250,6 +301,14 @@ void processInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
         cameraPos += cameraSpeed * glm::normalize(glm::cross(cameraFront, cameraUp));
+    }
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+    {
+        cameraPos += cameraSpeed * cameraUp;
+    }
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+    {
+        cameraPos -= cameraSpeed * cameraUp;
     }
 }
 
