@@ -116,8 +116,9 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, 0); // unbinding VBO
     glBindVertexArray(0); // unbinding VAO
 
-    // enable depth testing
+    // enable depth testing and face culling
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
 
     // setting texture samplers in frag shader to corresponding texture units
     objectShader.use();
@@ -171,7 +172,6 @@ int main()
         objectShader.setVec3("lightPos", lightPos);
 
         objectShader.setVec3("viewPos", cameraPos);
-
 
 
         glm::mat4 model = glm::mat4(1.0f);
