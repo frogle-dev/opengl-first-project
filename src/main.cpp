@@ -127,11 +127,8 @@ int main()
     glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
     objectShader.setVec3("lightColor", lightColor);
 
-    glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
-
 
     float lastFrame = 0.0f;
-
     // render loop
     while(!glfwWindowShouldClose(window))
     {
@@ -147,8 +144,6 @@ int main()
         glActiveTexture(GL_TEXTURE0); 
         glBindTexture(GL_TEXTURE_2D, texture1);
 
-        // lighting
-        objectShader.setVec3("lightPos", lightPos);
         
         // view
         glm::vec3 direction;
@@ -170,6 +165,14 @@ int main()
         objectShader.use();
         objectShader.setMat4("view", view);
         objectShader.setMat4("projection", projection);
+        
+        // lighting
+        glm::vec3 lightPos(sin((float)glfwGetTime()), 5.0f, cos((float)glfwGetTime()));
+        objectShader.setVec3("lightPos", lightPos);
+
+        objectShader.setVec3("viewPos", cameraPos);
+
+
 
         glm::mat4 model = glm::mat4(1.0f);
         for (unsigned int x = 0; x < 16; x++)
@@ -180,9 +183,9 @@ int main()
                 {
                     model = glm::mat4(1.0f);
                     model = glm::translate(model, glm::vec3(1.0f * x, -1.0f * y, -1.0f * z));
-
+                    
                     objectShader.setMat4("model", model);
-
+                    
                     glBindVertexArray(VAO);
                     glDrawArrays(GL_TRIANGLES, 0, 36);
                 }

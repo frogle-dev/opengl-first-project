@@ -21,6 +21,6 @@ void main()
     color = aColor;
     texCoord = aPos;
 
-    normal = aNormal;
+    normal = mat3(transpose(inverse(model))) * aNormal;
     fragPos = vec3(model * vec4(aPos, 1.0));
 }

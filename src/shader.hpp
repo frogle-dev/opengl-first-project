@@ -101,6 +101,10 @@ public:
     {
         glUniformMatrix4fv(glGetUniformLocation(shaderProgramID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
     }
+    void setMat3(const std::string &name, glm::mat3 value) const
+    {
+        glUniformMatrix3fv(glGetUniformLocation(shaderProgramID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
+    }
     void setVec3(const std::string &name, glm::vec3 value) const
     {
         glUniform3f(glGetUniformLocation(shaderProgramID, name.c_str()), value.x, value.y, value.z);
