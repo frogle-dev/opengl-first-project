@@ -21,7 +21,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void update(GLFWwindow* window);
 
 
-const unsigned int screenWidth = 1280, screenHeight = 720;
+const unsigned int initWidth = 1280, initHeight = 720;
+unsigned int viewWidth = initWidth, viewHeight = initHeight;
 
 float deltaTime = 0.0f;
 int fps;
@@ -35,7 +36,7 @@ glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 
-float lastMouseX = screenWidth/2, lastMouseY = screenHeight/2;
+float lastMouseX = initWidth/2, lastMouseY = initHeight/2;
 float yaw = -90.0f;
 float pitch = 0.0f;
 
@@ -43,7 +44,7 @@ int main()
 {
     // initialization
     GLFWwindow* window;
-    if (!init(window, screenWidth, screenHeight))
+    if (!init(window, initWidth, initHeight))
         return -1;
     
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -151,7 +152,7 @@ int main()
         );
         
         glm::mat4 projection;
-        projection = glm::perspective(glm::radians(85.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(85.0f), (float)viewWidth / viewHeight, 0.1f, 100.0f);
         
         objectShader.use();
         objectShader.setMat4("view", view);
@@ -301,7 +302,24 @@ void update(GLFWwindow* window)
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-    glViewport(0,0,width,height);
+    float aspect = (float)width / height;
+    float targetAspect = (float)initWidth / initHeight;
+
+    if (aspect > targetAspect)
+    {
+        viewHeight = height;
+        viewWidth = (int)(height * targetAspect);
+    }
+    else
+    {
+        viewWidth = width;
+        viewHeight = (int)(width / targetAspect);
+    }
+
+    int viewX = (width - viewWidth) / 2;
+    int viewY = (height - viewHeight) / 2;
+
+    glViewport(viewX,viewY,viewWidth,viewHeight);
 }
 
 bool firstMouse = true;
