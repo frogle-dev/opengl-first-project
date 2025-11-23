@@ -239,11 +239,11 @@ void update(GLFWwindow* window)
     feetVelocity = glm::vec3(0.0f, feetVelocity.y, 0.0f);
     if (isActionPressed("forward"))
     {
-        moveDir -= glm::normalize(glm::cross(camera.right, camera.up));
+        moveDir -= camera.straightFront;
     }
     if (isActionPressed("backward"))
     {
-        moveDir += glm::normalize(glm::cross(camera.right, camera.up));
+        moveDir += camera.straightFront;
     }
     if (isActionPressed("left"))
     {

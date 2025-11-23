@@ -20,6 +20,7 @@ class Camera
 public:
     glm::vec3 position;
     glm::vec3 front;
+    glm::vec3 straightFront; // follows yaw movement but not pitch, used for purely horizontal movement
     glm::vec3 up;
     glm::vec3 right;
     glm::vec3 worldUp;
@@ -76,5 +77,7 @@ private:
 
         right = glm::normalize(glm::cross(front, worldUp));
         up = glm::normalize(glm::cross(right, front));
+
+        straightFront = glm::normalize(glm::cross(right, worldUp));
     }
 };
