@@ -1,0 +1,9 @@
+{
+    "forward": "GLFW_KEY_W",
+    "backward": "GLFW_KEY_S",
+    "left": "GLFW_KEY_A",
+    "right": "GLFW_KEY_D",
+    "jump": "GLFW_KEY_SPACE",
+    "focus": "GLFW_KEY_ESCAPE",
+    "wireframe": "GLFW_KEY_C"
+}

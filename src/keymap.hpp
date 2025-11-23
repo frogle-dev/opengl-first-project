@@ -2,8 +2,12 @@
 
 #include <GLFW/glfw3.h>
 
+#include "../lib/json.hpp"
+#include <fstream>
+
 #include <unordered_map>
 #include <vector>
+#include <iostream>
 
 
 struct ActionState 
@@ -25,7 +29,7 @@ void keysRefresh()
     }
 }
 
-void bindAction(const std::string& actionName, int key) 
+void mapKey(const std::string& actionName, int key) 
 {
     bindings[actionName].push_back(key);
 }
@@ -72,4 +76,11 @@ void processKeyEvent(int key, int action)
             }
         }
     }
+}
+
+void readConfigKeymaps()
+{
+    std::ifstream keymapJson("../game_config/keymaps.json");
+
+    nlohmann::json data = nlohmann::json::parse(keymapJson);
 }

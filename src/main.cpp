@@ -26,19 +26,19 @@ void update(GLFWwindow* window);
 const unsigned int initWidth = 1280, initHeight = 720;
 unsigned int viewWidth = initWidth, viewHeight = initHeight;
 
+
 float deltaTime = 0.0f;
 int fps;
 float msPerFrame;
 
 Camera camera;
+float lastMouseX = initWidth/2, lastMouseY = initHeight/2;
+
 glm::vec3 feetPos = glm::vec3(0.0f, 0.0f, 2.0f);
 glm::vec3 feetVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
 const float bodyHeight = 1.0f;
 
 
-float lastMouseX = initWidth/2, lastMouseY = initHeight/2;
-float yaw = -90.0f;
-float pitch = 0.0f;
 
 int main()
 {
@@ -50,15 +50,16 @@ int main()
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetKeyCallback(window, key_callback);
-    
+
     // keybinds
-    bindAction("forward", GLFW_KEY_W);
-    bindAction("backward", GLFW_KEY_S);
-    bindAction("left", GLFW_KEY_A);
-    bindAction("right", GLFW_KEY_D);
-    bindAction("jump", GLFW_KEY_SPACE);
-    bindAction("focus", GLFW_KEY_ESCAPE);
-    bindAction("wireframe", GLFW_KEY_C);
+    mapKey("forward", GLFW_KEY_W);
+    mapKey("backward", GLFW_KEY_S);
+    mapKey("left", GLFW_KEY_A);
+    mapKey("right", GLFW_KEY_D);
+    mapKey("jump", GLFW_KEY_SPACE);
+    mapKey("focus", GLFW_KEY_ESCAPE);
+    mapKey("wireframe", GLFW_KEY_C);
+    readConfigKeymaps();
 
 
     // rendering stuff
@@ -137,6 +138,7 @@ int main()
 
         update(window);
 
+
         glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear color + depth buffer
 
@@ -185,7 +187,6 @@ int main()
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -194,6 +195,7 @@ int main()
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     objectShader.deleteProgram();
+    lightSourceShader.deleteProgram();
 
     glfwTerminate();
     return 0;
@@ -209,7 +211,7 @@ void update(GLFWwindow* window)
     // fps
     msPerFrame = deltaTime * 1000;
     fps = 1000 / msPerFrame;
-    std::cout << msPerFrame << ", " << fps << std::endl;
+    // std::cout << msPerFrame << ", " << fps << std::endl;
 
     // utility
     if (isActionJustPressed("focus"))
