@@ -1,6 +1,4 @@
 #include "../lib/glad.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include "../lib/stb_image.h"
 #include <GLFW/glfw3.h>
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -9,6 +7,7 @@
 #include "shader.hpp"
 #include "cube.hpp"
 #include "keymap.hpp"
+#include "helpers.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -20,9 +19,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 void update(GLFWwindow* window);
-void generateTexture(const char* path, unsigned int &id, bool RGBA);
-void setVertAttributes();
-void setLightSourceVertAttribs();
 
 
 const unsigned int screenWidth = 1280, screenHeight = 720;
@@ -46,31 +42,14 @@ float pitch = 0.0f;
 int main()
 {
     // initialization
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    
-    GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "First OpenGL", NULL, NULL);
-    if (window == NULL)
-    {
-        std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
+    GLFWwindow* window;
+    if (!init(window, screenWidth, screenHeight))
         return -1;
-    }
-    glfwMakeContextCurrent(window);
+    
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetKeyCallback(window, key_callback);
-
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-    if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        return -1;
-    }
-
+    
     // keybinds
     bindAction("forward", GLFW_KEY_W);
     bindAction("backward", GLFW_KEY_S);
@@ -184,7 +163,7 @@ int main()
 
         objectShader.setVec3("viewPos", cameraPos);
 
-
+        
         glm::mat4 model = glm::mat4(1.0f);
         for (unsigned int x = 0; x < 16; x++)
         {
@@ -227,42 +206,8 @@ int main()
     return 0;
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0,0,width,height);
-}
 
-bool firstMouse = true;
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
-    if (firstMouse)
-    {
-        lastMouseX = xpos;
-        lastMouseY = ypos;
-        firstMouse = false;
-    } // this is so when mouse initially moves, it doesnt make a large jkittery motion to that position
-
-    float xOffset = xpos - lastMouseX;
-    float yOffset = lastMouseY - ypos;
-    lastMouseX = xpos;
-    lastMouseY = ypos;
-
-    const float sensitivity = 0.1f;
-    xOffset *= sensitivity;
-    yOffset *= sensitivity;
-
-    yaw += xOffset;
-    pitch += yOffset;
-
-    pitch = std::clamp(pitch, -89.0f, 89.0f);
-}
-
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    processKeyEvent(key, action);
-}
-
-
+// game loop stuff
 bool grounded = false;
 bool focus = true;
 bool wireframe = false;
@@ -353,69 +298,38 @@ void update(GLFWwindow* window)
     keysRefresh();
 }
 
-void generateTexture(const char* path, unsigned int &id, bool RGBA)
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-    glGenTextures(1, &id);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, id);
-
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_REPEAT);	
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    int width, height, nrChannels;
-    unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
-    if (!data)
-    {
-        std::cout << "Failed to load texture" << std::endl;
-        stbi_image_free(data);
-        return;
-    }
-
-    if (RGBA)
-    {
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-    }
-    else
-    {
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-    }
-
-    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-    
-    stbi_image_free(data);
+    glViewport(0,0,width,height);
 }
 
-void setVertAttributes()
+bool firstMouse = true;
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-    // position vertex attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // color vertex attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    // texture vertex attribute
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(6 * sizeof(float)));   
-    glEnableVertexAttribArray(2);
-    // normals vertex attribute
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(9 * sizeof(float)));   
-    glEnableVertexAttribArray(3);
+    if (firstMouse)
+    {
+        lastMouseX = xpos;
+        lastMouseY = ypos;
+        firstMouse = false;
+    } // this is so when mouse initially moves, it doesnt make a large jkittery motion to that position
+
+    float xOffset = xpos - lastMouseX;
+    float yOffset = lastMouseY - ypos;
+    lastMouseX = xpos;
+    lastMouseY = ypos;
+
+    const float sensitivity = 0.1f;
+    xOffset *= sensitivity;
+    yOffset *= sensitivity;
+
+    yaw += xOffset;
+    pitch += yOffset;
+
+    pitch = std::clamp(pitch, -89.0f, 89.0f);
 }
 
-void setLightSourceVertAttribs()
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    // position vertex attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+    processKeyEvent(key, action);
 }
