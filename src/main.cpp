@@ -8,10 +8,12 @@
 #include "cube.hpp"
 #include "keymap.hpp"
 #include "helpers.hpp"
+#include "camera.hpp"
 
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <random>
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -28,12 +30,10 @@ float deltaTime = 0.0f;
 int fps;
 float msPerFrame;
 
+Camera camera;
 glm::vec3 feetPos = glm::vec3(0.0f, 0.0f, 2.0f);
 glm::vec3 feetVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
 const float bodyHeight = 1.0f;
-glm::vec3 cameraPos = glm::vec3(feetPos.x, feetPos.y + bodyHeight, feetPos.z);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 
 float lastMouseX = initWidth/2, lastMouseY = initHeight/2;
@@ -123,6 +123,10 @@ int main()
     glBindTexture(GL_TEXTURE_CUBE_MAP, specularMap);
 
 
+    std::random_device rand_dev;
+    std::mt19937 generator(rand_dev());
+    std::uniform_int_distribution<int> randr(0, 10);
+
     // render loop
     float lastFrame = 0.0f;
     while(!glfwWindowShouldClose(window))
@@ -136,33 +140,21 @@ int main()
         glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear color + depth buffer
 
-        
-        // view
-        glm::vec3 direction;
-        direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-        direction.y = sin(glm::radians(pitch));
-        direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-        cameraFront = glm::normalize(direction);
-        
-        glm::mat4 view = glm::mat4(1.0f);
-        view = glm::lookAt(
-            cameraPos,
-            cameraPos + cameraFront,
-            cameraUp
-        );
+        objectShader.use();
+
+        glm::mat4 view = camera.GetViewMatrix();
+        objectShader.setMat4("view", view);
         
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(85.0f), (float)viewWidth / viewHeight, 0.1f, 100.0f);
-        
-        objectShader.use();
-        objectShader.setMat4("view", view);
         objectShader.setMat4("projection", projection);
+        
         
         // lighting
         glm::vec3 lightPos(sin((float)glfwGetTime()) * 5, 5.0f, cos((float)glfwGetTime()) * 5);
         objectShader.setVec3("light.pos", lightPos);
 
-        objectShader.setVec3("viewPos", cameraPos);
+        objectShader.setVec3("viewPos", camera.position);
 
         
         glm::mat4 model = glm::mat4(1.0f);
@@ -242,32 +234,31 @@ void update(GLFWwindow* window)
 
 
     // movement
-    const float cameraSpeed = 5.0f; 
-    glm::vec3 cameraRight = glm::normalize(glm::cross(cameraFront, cameraUp));
+    const float moveSpeed = 5.0f; 
     glm::vec3 moveDir(0.0f);
     feetVelocity = glm::vec3(0.0f, feetVelocity.y, 0.0f);
     if (isActionPressed("forward"))
     {
-        moveDir -= glm::normalize(glm::cross(cameraRight, cameraUp));
+        moveDir -= glm::normalize(glm::cross(camera.right, camera.up));
     }
     if (isActionPressed("backward"))
     {
-        moveDir += glm::normalize(glm::cross(cameraRight, cameraUp));
+        moveDir += glm::normalize(glm::cross(camera.right, camera.up));
     }
     if (isActionPressed("left"))
     {
-        moveDir -= cameraRight;
+        moveDir -= camera.right;
     }
     if (isActionPressed("right"))
     {
-        moveDir += cameraRight;
+        moveDir += camera.right;
     }
 
     if (glm::length(moveDir) > 0.0f)
     {
         moveDir = glm::normalize(moveDir);
-        feetVelocity.x = moveDir.x * cameraSpeed; 
-        feetVelocity.z = moveDir.z * cameraSpeed;
+        feetVelocity.x = moveDir.x * moveSpeed; 
+        feetVelocity.z = moveDir.z * moveSpeed;
     }
 
     
@@ -294,7 +285,7 @@ void update(GLFWwindow* window)
         grounded = false;
     }
 
-    cameraPos = glm::vec3(feetPos.x, feetPos.y + bodyHeight, feetPos.z);
+    camera.position = glm::vec3(feetPos.x, feetPos.y + bodyHeight, feetPos.z);
 
     keysRefresh();
 }
@@ -332,19 +323,13 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
         firstMouse = false;
     } // this is so when mouse initially moves, it doesnt make a large jkittery motion to that position
 
+    
     float xOffset = xpos - lastMouseX;
     float yOffset = lastMouseY - ypos;
     lastMouseX = xpos;
     lastMouseY = ypos;
 
-    const float sensitivity = 0.1f;
-    xOffset *= sensitivity;
-    yOffset *= sensitivity;
-
-    yaw += xOffset;
-    pitch += yOffset;
-
-    pitch = std::clamp(pitch, -89.0f, 89.0f);
+    camera.ProcessMouseMovement(xOffset, yOffset);
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)

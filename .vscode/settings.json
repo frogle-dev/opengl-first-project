@@ -58,6 +58,7 @@
         "codecvt": "cpp",
         "cstring": "cpp",
         "ratio": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "print": "cpp"
     }
 }
