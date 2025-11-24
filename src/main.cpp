@@ -77,7 +77,7 @@ int main()
     
     // setup keybinds from json file
     std::string cur_actionName;
-    int cur_keycode;
+    std::vector<int> cur_keycodes;
     reloadConfigKeymaps();
 
     // rendering stuff
@@ -147,6 +147,10 @@ int main()
     float gui_lightSpecular[3] = {1.0f, 1.0f, 1.0f};
     glm::vec3 lightSpecular;
 
+    // imgui stuff
+    bool demoWindow = false;
+    bool changingKeybind = false;
+
     // render loop
     float lastFrame = 0.0f;
     while(!glfwWindowShouldClose(window))
@@ -161,8 +165,24 @@ int main()
         ImGui::NewFrame();
         ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 
-        ImGui::ShowDemoWindow();
+        if (ImGui::BeginMainMenuBar())
+        {
+            if (ImGui::BeginMenu("Window"))
+            {
+                if (ImGui::MenuItem("Demo Window")) 
+                {
+                    demoWindow = !demoWindow;
+                }
+                ImGui::EndMenu();
+            }
+            ImGui::EndMainMenuBar();
+        }
 
+        if (demoWindow)
+        {
+            ImGui::ShowDemoWindow();
+        }
+        
         bool infoActive = true;
         ImGui::Begin("Info", &infoActive, ImGuiWindowFlags_None);
         ImGui::Text("ms per frame: %f", msPerFrame);
@@ -171,29 +191,64 @@ int main()
         ImGui::Separator();
         ImGui::Text("Keymaps");
         ImGui::BeginChild("Keymaps");
-        const auto& bindings = getConfigKeymaps();
+        auto& bindings = getConfigKeymaps();
         for (auto& [actionName, keycodes] : bindings)
         {
-            std::string name = "Action: " + actionName + " | Key: " + std::to_string(keycodes[0]);
-            if (ImGui::Button(name.c_str()))
+            if (ImGui::Button(actionName.c_str()))
             {
                 cur_actionName = actionName;
-                cur_keycode = keycodes[0];
+                changingKeybind = true;
                 ImGui::OpenPopup("Change Keymap?");
             }
         }
+        if (changingKeybind)
+        {
+            cur_keycodes = bindings[cur_actionName];
+        }
 
-        if(ImGui::BeginPopupModal("Change Keymap?"))
+        if(ImGui::BeginPopupModal("Change Keymap?", NULL, ImGuiWindowFlags_AlwaysAutoResize))
         {
             ImGui::Text("Changing action: %s", cur_actionName.c_str());
+            ImGui::Text("Press a key, then click 'add' or 'change' to assign the currently pressed key to that slot");
+            
+            ImGui::Separator();
             ImGui::Text("Press any key: %i", currentKeyPress);
-            if (ImGui::Button("Submit")) 
-            { 
-                setConfigKeymap(cur_actionName, currentKeyPress);
-                reloadConfigKeymaps();
-                ImGui::CloseCurrentPopup(); 
+
+            if(ImGui::BeginListBox("Current assigned keycodes"))
+            {
+                for (int i = 0; i < cur_keycodes.size(); i++)
+                {
+                    int key = cur_keycodes[i];
+                    ImGui::Text("%i", key);
+                    ImGui::SameLine();
+
+                    ImGui::PushID(key);
+                    if (ImGui::Button("Change"))
+                    {
+                        setConfigKeymap(cur_actionName, false, currentKeyPress, i);
+                        reloadConfigKeymaps();
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button("Remove"))
+                    {
+                        removeConfigKeymap(cur_actionName, i);
+                        reloadConfigKeymaps();
+                    }
+                    ImGui::PopID();
+                }
+                if(ImGui::Button("Add"))
+                {
+                    setConfigKeymap(cur_actionName, true, currentKeyPress);
+                    reloadConfigKeymaps();
+                }
+                ImGui::EndListBox();
             }
-            if (ImGui::Button("Cancel")) { ImGui::CloseCurrentPopup(); }
+
+            if (ImGui::Button("Close")) 
+            { 
+                ImGui::CloseCurrentPopup(); 
+                changingKeybind = false;
+            }
             ImGui::EndPopup();
         }
         ImGui::EndChild();

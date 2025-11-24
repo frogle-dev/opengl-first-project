@@ -80,7 +80,7 @@ void processKeyEvent(int key, int action)
 std::ifstream keymapJson("../game_config/keymaps.json");
 nlohmann::json data = nlohmann::json::parse(keymapJson);
 // returns all keymaps that have been set from "reloadConfigKeymaps()"
-const auto& getConfigKeymaps()
+auto& getConfigKeymaps()
 {
     return bindings;
 }
@@ -88,16 +88,40 @@ const auto& getConfigKeymaps()
 // reads and loads all keymaps from keymaps.json (run whenever keymaps.json is changed)
 void reloadConfigKeymaps()
 {
-    for (auto& [actionName, keycode] : data.items())
+    bindings.clear();
+    for (auto& [actionName, keycodes] : data.items())
     {
-        bindings[actionName].push_back(keycode);
+        bindings[actionName] = (std::vector<int>)keycodes;
     }
 }
 
-// sets an already existing mapping to another key, or creates a new one in keymaps.json
-void setConfigKeymap(const std::string& actionName, int keycode)
+// sets an already existing mapping to another key, or creates a new one in keymaps.json. 
+//bool 'addkeycode' = true, adds the keycode to the json file, as false it changes a keycode at 'index'
+void setConfigKeymap(const std::string& actionName, bool addKeycode, int keycode, int index = 0)
 {
-    data[actionName] = keycode;
+    if (addKeycode)
+    {
+        data[actionName].push_back(keycode);
+    }
+    else
+    {
+        data[actionName][index] = keycode;
+    }
+
+    std::ofstream out("../game_config/keymaps.json");
+    out << data.dump(4);
+}
+
+// removes an already existing mapping in keymaps.json. 
+void removeConfigKeymap(const std::string& actionName, int index)
+{
+    // check if the action name exists
+    if (data.contains(actionName) && index >= 0 && index < data[actionName].size()) {
+        // remove keycode at index of action array
+        data[actionName].erase(data[actionName].begin() + index);
+    } else {
+        std::cerr << "Invalid action or index.\n";
+    }
 
     std::ofstream out("../game_config/keymaps.json");
     out << data.dump(4);
