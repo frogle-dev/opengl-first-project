@@ -173,6 +173,7 @@ int main()
                 {
                     demoWindow = !demoWindow;
                 }
+
                 ImGui::EndMenu();
             }
             ImGui::EndMainMenuBar();
@@ -183,8 +184,8 @@ int main()
             ImGui::ShowDemoWindow();
         }
         
-        bool infoActive = true;
-        ImGui::Begin("Info", &infoActive, ImGuiWindowFlags_None);
+        // info panel for fps/ms per frame and keymaps
+        ImGui::Begin("Info", NULL, ImGuiWindowFlags_None);
         ImGui::Text("ms per frame: %f", msPerFrame);
         ImGui::Text("fps: %i", fps);
         
@@ -222,7 +223,7 @@ int main()
                     ImGui::Text("%i", key);
                     ImGui::SameLine();
 
-                    ImGui::PushID(key);
+                    ImGui::PushID(key + i);
                     if (ImGui::Button("Change"))
                     {
                         setConfigKeymap(cur_actionName, false, currentKeyPress, i);
@@ -254,8 +255,8 @@ int main()
         ImGui::EndChild();
         ImGui::End();
         
-        bool inspectorActive = true;
-        ImGui::Begin("Inspector", &inspectorActive, ImGuiWindowFlags_None);
+        // inspector window for modifying properties of objects
+        ImGui::Begin("Inspector", NULL, ImGuiWindowFlags_None);
         ImGui::Text("Object: ");
         ImGui::Text("Light");
 
@@ -265,11 +266,12 @@ int main()
 
         ImGui::Separator();
         ImGui::Text("Light properties");
-        ImGui::ColorEdit3("Ambient color", gui_lightAmbient);
-        ImGui::ColorEdit3("Diffuse color", gui_lightDiffuse);
-        ImGui::ColorEdit3("Specular color", gui_lightSpecular);
+        ImGui::ColorEdit3("Ambient", gui_lightAmbient);
+        ImGui::ColorEdit3("Diffuse", gui_lightDiffuse);
+        ImGui::ColorEdit3("Specular", gui_lightSpecular);
         ImGui::End();
         
+
         // game loop stuff
         update(window);
 
