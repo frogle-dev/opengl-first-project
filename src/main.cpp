@@ -13,6 +13,8 @@
 #include "keymap.hpp"
 #include "helpers.hpp"
 #include "camera.hpp"
+#include "textures.hpp"
+#include "models.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -76,18 +78,14 @@ int main()
     std::vector<int> cur_keycodes;
     reloadConfigKeymaps();
 
-    // rendering stuff
-    unsigned int texture1;
-    generateTexture("../images/gold_ore_stone.png", texture1, false);
-    unsigned int specularMap;
-    generateTexture("../images/gold_ore_stone_specular.png", specularMap, true);
     
+    // rendering and shader stuff
     Shader objectShader("/home/jonah/Programming/Opengl/opengl-first-project/src/vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/src/fragment.glsl");
     Shader lightSourceShader("/home/jonah/Programming/Opengl/opengl-first-project/src/light_source_vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/src/light_source_fragment.glsl");
 
 
-    unsigned int VAO; //vertex array object
-    glGenVertexArrays(1, &VAO);
+    // unsigned int VAO; //vertex array object
+    // glGenVertexArrays(1, &VAO);
 
     unsigned int lightVAO;
     glGenVertexArrays(1, &lightVAO);
@@ -102,8 +100,8 @@ int main()
     // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices_cube), indices_cube, GL_STATIC_DRAW);
     
-    glBindVertexArray(VAO);
-    setVertAttributes();
+    // glBindVertexArray(VAO);
+    // setVertAttributes();
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
@@ -117,21 +115,37 @@ int main()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-    // setting texture samplers in frag shader to corresponding texture units
+    // texture stuff
+    TextureManager::Get().GenerateTextureArray(4096, 4096, 10);
+    
+    // int texLayerGold = TextureManager::Get().LoadTexture("../images/gold_ore_stone.png");
+    // int texLayerGold_spec = TextureManager::Get().LoadTexture("../images/gold_ore_stone_specular.png");
+
+    GLuint texArrayID = TextureManager::Get().GetTexArrayID();
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, texArrayID);
+
+    stbi_set_flip_vertically_on_load(true);
+
     objectShader.use();
-    objectShader.setInt("cubemap", 0);
+    objectShader.setInt("texArray", 0); // tex array should use tex unit 0
 
-    objectShader.setInt("material.diffuse", 0); // tex unit 0
-    objectShader.setInt("material.specular", 1); // tex unit 1
-    objectShader.setInt("material.emission", 2); // tex unit 2
-    objectShader.setFloat("material.emissionStrength", 0.0f);
+    // objectShader.setInt("diffuseLayerCount", 1);
+    // objectShader.setInt("specularLayerCount", 1);
+    // objectShader.setInt("emissionLayerCount", 1);
+    // objectShader.setInt("material.diffuseTexLayer[0]", texLayerGold);
+    // objectShader.setInt("material.specularTexLayer[0]", texLayerGold_spec);
+    // objectShader.setInt("material.emissionTexLayer[0]", texLayerGold_spec);
+    objectShader.setFloat("material.emissionStrength", 1.0f);
     objectShader.setVec3("material.specular", glm::vec3(0.2f));
-    objectShader.setFloat("material.shininess", 128.0f);
+    objectShader.setFloat("material.shininess", 32.0f);
 
-    glActiveTexture(GL_TEXTURE0); 
-    glBindTexture(GL_TEXTURE_CUBE_MAP, texture1);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, specularMap);
+    // model loading
+    Model backpack("../models/backpack/backpack.obj");
+
+    TextureManager::Get().GenerateMipmaps(); // generate texture array mipmaps once all textures have been loaded in
+
     
     glm::vec3 pointLightPos[] = {
         glm::vec3( 0.7f,  5.0f,  2.0f),
@@ -303,22 +317,26 @@ int main()
 
         
         glm::mat4 model = glm::mat4(1.0f);
-        for (unsigned int x = 0; x < 16; x++)
-        {
-            for (unsigned int y = 0; y < 16; y++)
-            {
-                for (unsigned int z = 0; z < 16; z++)
-                {
-                    model = glm::mat4(1.0f);
-                    model = glm::translate(model, glm::vec3(1.0f * x, -1.0f * y, -1.0f * z));
+        // for (unsigned int x = 0; x < 16; x++)
+        // {
+        //     for (unsigned int y = 0; y < 16; y++)
+        //     {
+        //         for (unsigned int z = 0; z < 16; z++)
+        //         {
+        //             model = glm::mat4(1.0f);
+        //             model = glm::translate(model, glm::vec3(1.0f * x, -1.0f * y, -1.0f * z));
                     
-                    objectShader.setMat4("model", model);
+        //             objectShader.setMat4("model", model);
                     
-                    glBindVertexArray(VAO);
-                    glDrawArrays(GL_TRIANGLES, 0, 36);
-                }
-            }
-        }
+        //             glBindVertexArray(VAO);
+        //             glDrawArrays(GL_TRIANGLES, 0, 36);
+        //         }
+        //     }
+        // }
+
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        objectShader.setMat4("model", model);
+        backpack.Draw(objectShader);
         
         
         glBindVertexArray(lightVAO);
@@ -343,7 +361,7 @@ int main()
     }
     
     // end of process life
-    glDeleteVertexArrays(1, &VAO);
+    // glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     objectShader.deleteProgram();
     lightSourceShader.deleteProgram();

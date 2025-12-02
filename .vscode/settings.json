@@ -63,6 +63,17 @@
         "any": "cpp",
         "forward_list": "cpp",
         "map": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "bitset": "cpp",
+        "chrono": "cpp",
+        "condition_variable": "cpp",
+        "list": "cpp",
+        "set": "cpp",
+        "unordered_set": "cpp",
+        "regex": "cpp",
+        "semaphore": "cpp",
+        "shared_mutex": "cpp",
+        "stack": "cpp",
+        "stop_token": "cpp"
     }
 }

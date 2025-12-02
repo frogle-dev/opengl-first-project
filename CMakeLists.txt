@@ -13,6 +13,7 @@ FetchContent_MakeAvailable(EnTT)
 
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
+find_package(assimp REQUIRED)
 
 add_library(imgui
     # main imgui stuff
@@ -47,6 +48,7 @@ src/fragment.glsl
 target_link_libraries(first_opengl 
 glfw
 OpenGL::GL
+assimp
 EnTT::EnTT
 imgui
 X11
