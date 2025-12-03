@@ -95,12 +95,12 @@ void main()
     result += calcSpotLight(spotLight, norm, fragPos, viewDir);
 
     // emission
-    // vec3 emission = vec3(0.0);
-    // for (int i = 0; i < material.emissionLayerCount; i++)
-    // {
-    //     emission += vec3(texture(texArray, vec3(texCoord, float(material.emissionTexLayers[i])))) * material.emissionStrength;
-    // }
-    // result += emission;
+    vec3 emission = vec3(0.0);
+    for (int i = 0; i < material.emissionLayerCount; i++)
+    {
+        emission += material.emissionStrength * vec3(texture(texArray, vec3(texCoord, float(material.diffuseStartLayer + i))));
+    }
+    result += emission;
 
     FragColor = vec4(result, 1.0);
 }

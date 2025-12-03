@@ -45,7 +45,7 @@ public:
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
 
-    // textures vector has max of 8 textures per texture type
+
     Mesh(std::vector<Vertex>& _vertices, std::vector<unsigned int>& _indices, std::vector<Texture>& _textures)
     {
         vertices = _vertices;
@@ -79,7 +79,6 @@ public:
                         shader.setInt("material.diffuseStartLayer", curLayer); 
                     }
                     numDiffuse++;
-                    // diffuseTexLayers.push_back(curLayer);
                     break;
                 }
                 case TextureType::SPECULAR:
@@ -89,33 +88,23 @@ public:
                         shader.setInt("material.specularStartLayer", curLayer); 
                     }
                     numSpecular++;
-                    // specularTexLayers.push_back(curLayer);
                     break;
                 }
-                // case TextureType::EMISSION:
-                // {
-                //     if (numEmission == 0)
-                //     {
-                //         shader.setInt("material.emissionStartLayer", curLayer); 
-                //     }
-                //     numEmission++;
-                //     // emissionTexLayers.push_back(curLayer);
-                //     break;
-                // }
+                case TextureType::EMISSION:
+                {
+                    if (numEmission == 0)
+                    {
+                        shader.setInt("material.emissionStartLayer", curLayer); 
+                    }
+                    numEmission++;
+                    break;
+                }
             }
         }
 
-        // shader.setInt("material.diffuseTexLayers[" + std::to_string(i) + "]", curLayer);
-        // shader.setInt("material.specularTexLayers[" + std::to_string(i) + "]", curLayer);
-        // shader.setInt("material.emissionTexLayers[" + std::to_string(i) + "]", curLayer);
-
-        // shader.setIntArray("material.diffuseTexLayers", diffuseTexLayers.size(), &diffuseTexLayers[0]);
-        // shader.setIntArray("material.specularTexLayers", specularTexLayers.size(), &specularTexLayers[0]);
-        // shader.setIntArray("material.emissionTexLayers", emissionTexLayers.size(), &emissionTexLayers[0]);
-
         shader.setInt("material.diffuseLayerCount", numDiffuse);
         shader.setInt("material.specularLayerCount", numSpecular);
-        // shader.setInt("material.emissionLayerCount", numEmission);
+        shader.setInt("material.emissionLayerCount", numEmission);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, (unsigned int)indices.size(), GL_UNSIGNED_INT, 0);

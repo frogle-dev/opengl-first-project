@@ -118,9 +118,6 @@ int main()
     // texture stuff
     TextureManager::Get().GenerateTextureArray(4096, 4096, 10);
     
-    // int texLayerGold = TextureManager::Get().LoadTexture("../images/gold_ore_stone.png");
-    // int texLayerGold_spec = TextureManager::Get().LoadTexture("../images/gold_ore_stone_specular.png");
-
     GLuint texArrayID = TextureManager::Get().GetTexArrayID();
 
     glActiveTexture(GL_TEXTURE0);
@@ -131,12 +128,6 @@ int main()
     objectShader.use();
     objectShader.setInt("texArray", 0); // tex array should use tex unit 0
 
-    // objectShader.setInt("diffuseLayerCount", 1);
-    // objectShader.setInt("specularLayerCount", 1);
-    // objectShader.setInt("emissionLayerCount", 1);
-    // objectShader.setInt("material.diffuseTexLayer[0]", texLayerGold);
-    // objectShader.setInt("material.specularTexLayer[0]", texLayerGold_spec);
-    // objectShader.setInt("material.emissionTexLayer[0]", texLayerGold_spec);
     objectShader.setFloat("material.emissionStrength", 1.0f);
     objectShader.setVec3("material.specular", glm::vec3(0.2f));
     objectShader.setFloat("material.shininess", 32.0f);
@@ -385,7 +376,6 @@ void update(GLFWwindow* window)
     // fps
     msPerFrame = deltaTime * 1000;
     fps = 1000 / msPerFrame;
-    // std::cout << msPerFrame << ", " << fps << std::endl;
 
     // utility
     if (isActionJustPressed("focus"))
