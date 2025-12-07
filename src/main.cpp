@@ -129,11 +129,10 @@ int main()
     objectShader.setInt("texArray", 0); // tex array should use tex unit 0
 
     objectShader.setFloat("material.emissionStrength", 1.0f);
-    objectShader.setVec3("material.specular", glm::vec3(0.2f));
-    objectShader.setFloat("material.shininess", 32.0f);
+    objectShader.setFloat("material.shininess", 128.0f);
 
     // model loading
-    Model goldOre("../models/Gold_Ore_Block/GoldOre.obj");
+    Model goldOre("../models/Gold_Ore_Block/Gold.obj");
 
     TextureManager::Get().GenerateMipmaps(); // generate texture array mipmaps once all textures have been loaded in
 
@@ -291,12 +290,12 @@ int main()
         objectShader.setVec3("pointLights[0].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
         objectShader.setVec3("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
         objectShader.setFloat("pointLights[0].constant", 1.0f);
-        objectShader.setFloat("pointLights[0].linear", 0.09f);
-        objectShader.setFloat("pointLights[0].quadratic", 0.032f);
+        objectShader.setFloat("pointLights[0].linear", 0.027f);
+        objectShader.setFloat("pointLights[0].quadratic", 0.0028f);
 
         // spot light
-        objectShader.setVec3("spotLight.position", camera.position);
-        objectShader.setVec3("spotLight.direction", camera.front);
+        objectShader.setVec3("spotLight.position", glm::vec3(0.0f, 1.0f, 4.0f));
+        objectShader.setVec3("spotLight.direction", glm::vec3(1.0f, 0.0f, 0.0f));
         objectShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
         objectShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
         objectShader.setVec3("spotLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
@@ -326,7 +325,7 @@ int main()
         // }
         
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
+        model = glm::translate(model, glm::vec3(0.0f, -2.0f, 2.0f));
         objectShader.setMat4("model", model);
         goldOre.Draw(objectShader);
         

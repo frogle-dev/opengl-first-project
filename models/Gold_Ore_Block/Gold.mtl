@@ -1,12 +1,12 @@
-# Blender 5.0.0 MTL File: 'GoldOre.blend'
+# Blender 5.0.0 MTL File: 'Gold.blend'
 # www.blender.org
 
 newmtl Gold
-Ns 250.000000
+Ns 265.621307
 Ka 1.000000 1.000000 1.000000
-Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 2
 map_Kd diffuse.png
+map_Ks specular.png
