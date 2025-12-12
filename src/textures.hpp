@@ -26,10 +26,10 @@ public:
     void GenerateTextureArray(int _texWidth, int _texHeight, int _maxTextures)
     {
         maxTexLayers = _maxTextures;
-        texWidth = _texWidth;
-        texHeight = _texHeight;
+        maxTexWidth = _texWidth;
+        maxTexHeight = _texHeight;
 
-        mipLevels = (int)std::floor(std::log2(texWidth)) + 1;
+        mipLevels = (int)std::floor(std::log2(maxTexWidth)) + 1;
 
         glGenTextures(1, &texArrayID);
         glActiveTexture(GL_TEXTURE0);
@@ -44,53 +44,9 @@ public:
         glTexStorage3D(GL_TEXTURE_2D_ARRAY,
             mipLevels,
             GL_RGBA8,
-            texWidth, texHeight,
+            maxTexWidth, maxTexHeight,
             maxTexLayers
         );
-    }
-    
-    int LoadTexture(const char* absolutePath)
-    {
-        if (nextTexLayer >= maxTexLayers)
-        {
-            std::cout << "(Texture Manager): Texture Array Error: cant have more textures than max specified for texture array" << std::endl;
-            return -1;
-        }
-
-        
-        int width, height, numChannels;
-        unsigned char *data = stbi_load(absolutePath, &width, &height, &numChannels, 0);
-        if (!data)
-        {
-            std::cout << "(Texture Manager): Texture Error: Failed to load texture" << std::endl;
-            return -1;
-        }
-        
-        if (width != texWidth || height != texHeight)
-        {
-            std::cout << "(Texture Manager): Texture Error: width and height do not match texture array width and height";
-            return -1;
-        }
-        
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, texArrayID);
-
-        glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
-            0, 
-            0, 0, nextTexLayer,
-            texWidth, texHeight, 1,
-            GL_RGBA, GL_UNSIGNED_BYTE,
-            data
-        );
-        
-        stbi_image_free(data);
-
-        int texLayerUsed = nextTexLayer; // set to the current layer used for the texture just initalized
-        nextTexLayer++;
-
-        glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-
-        return texLayerUsed; // return the layer just used in order to be used in shaders
     }
 
     int LoadTexture(std::string path, std::string directoryPath)
@@ -103,28 +59,33 @@ public:
 
 
         int width, height, numChannels;
-        unsigned char *data = stbi_load((directoryPath + "/" + path).c_str(), &width, &height, &numChannels, 0);
+        unsigned char *data = stbi_load((directoryPath + "/" + path).c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
 
-        std::cout << numChannels << std::endl;
         if (!data)
         {
             std::cout << "(Texture Manager): Texture Error: Failed to load texture" << std::endl;
             return -1;
         }
         
-        if (width != texWidth || height != texHeight)
+        if (width > maxTexWidth || height > maxTexHeight)
         {
-            std::cout << "(Texture Manager): Texture Error: width and height do not match texture array width and height" << std::endl;
+            std::cout << "(Texture Manager): Texture Error: width and height are larger than texture array width and height" << std::endl;
             return -1;
+        }
+
+        if (width != maxTexWidth || height != maxTexHeight)
+        {
+            std::cout << "(Texture Manager): Texture Warning: width and height do not match texture array width and height, "
+            "texture will still be inserted but will not take up the full resolution." << std::endl;
         }
         
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, texArrayID);
 
         glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
-            0, 
+            1, 
             0, 0, nextTexLayer,
-            texWidth, texHeight, 1,
+            maxTexWidth, maxTexHeight, 1,
             GL_RGBA, GL_UNSIGNED_BYTE,
             data
         );
@@ -148,11 +109,11 @@ public:
 
 private:
     // private constructor so other instances cant be made
-    TextureManager() : texArrayID(0), texWidth(0), texHeight(0), maxTexLayers(0), nextTexLayer(0), mipLevels(0) {}
+    TextureManager() : texArrayID(0), maxTexWidth(0), maxTexHeight(0), maxTexLayers(0), nextTexLayer(0), mipLevels(0) {}
 
     GLuint texArrayID;
-    int texWidth;
-    int texHeight;
+    int maxTexWidth;
+    int maxTexHeight;
 
     int mipLevels;
 

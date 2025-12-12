@@ -1,0 +1,15 @@
+lambert109_v_x
+==============
+  Textures:
+    - light01
+
+  Ambient Colors:
+    - 50, 50, 50, 50
+
+  Material Colors:
+    - 204, 204, 204, 255
+    - 204, 204, 204, 255
+
+  Steps:
+    1: RGB = ((tex #1 RGB) * (vertex RGB))
+         A = ((tex #1 A) * (vertex A))

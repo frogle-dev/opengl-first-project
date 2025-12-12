@@ -1,0 +1,19 @@
+LOD
+===
+  Textures:
+
+  Ambient Colors:
+    - 50, 50, 50, 50
+
+  Constant Colors:
+    - 128, 128, 128, 255
+
+  Color Registers:
+    - 0, 0, 0, 255
+    - 255, 255, 255, 150
+
+  Steps:
+    1: RGB = (150, 150, 150)
+         A = 0
+    2: RGB = ((128, 128, 128) * (prev. RGB))
+         A = 255

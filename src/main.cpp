@@ -116,7 +116,7 @@ int main()
     glEnable(GL_CULL_FACE);
 
     // texture stuff
-    TextureManager::Get().GenerateTextureArray(4096, 4096, 10);
+    TextureManager::Get().GenerateTextureArray(4096, 4096, 100);
     
     GLuint texArrayID = TextureManager::Get().GetTexArrayID();
 
@@ -133,6 +133,7 @@ int main()
 
     // model loading
     Model goldOre("../models/Gold_Ore_Block/Gold.obj");
+    // Model windfall("../models/Windfall/Windfall.obj");
 
     TextureManager::Get().GenerateMipmaps(); // generate texture array mipmaps once all textures have been loaded in
 
@@ -324,6 +325,12 @@ int main()
         //     }
         // }
         
+        // model = glm::mat4(1.0f);
+        // model = glm::translate(model, glm::vec3(0.0f, -2.0f, 2.0f));
+        // model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
+        // objectShader.setMat4("model", model);
+        // windfall.Draw(objectShader);
+
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, -2.0f, 2.0f));
         objectShader.setMat4("model", model);

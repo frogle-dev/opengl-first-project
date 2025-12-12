@@ -1,0 +1,221 @@
+SC_01_umi
+=========
+  Textures:
+
+  Ambient Colors:
+    - 50, 50, 50, 50
+
+  Constant Colors:
+    - 70, 90, 150, 255
+
+  Material Colors:
+    - 204, 204, 204, 255
+    - 204, 204, 204, 255
+
+  Color Registers:
+    - 70, 90, 150, 255
+
+  Steps:
+    1: RGB = (70, 90, 150)
+         A = 255
+
+
+
+SC_01_umi_v
+===========
+  Textures:
+    - Txa_nami_01
+        Offset: -0.3699999749660492, -0.6300000548362732
+    - Txa_nami_01
+        Offset: 0.3699999749660492, -0.6300000548362732
+    - Txa_nami_01
+        Offset: 0.6425060629844666, -0.3329407870769501
+    - Txa_nami_01
+        Offset: -0.6425060629844666, -0.3329407870769501
+    - Txa_nami_02
+        Offset: 0.35749393701553345, -0.3329407870769501
+
+  Ambient Colors:
+    - 50, 50, 50, 50
+
+  Constant Colors:
+    - 100, 180, 180, 255
+    - 80, 100, 150, 255
+
+  Steps:
+    1: RGB = (255, 255, 255)
+         A = (tex #1 A)
+    2: RGB = (prev. RGB)
+         A = (tex #2 A), then add (prev. A)
+    3: RGB = (prev. RGB)
+         A = (tex #3 A)
+    4: RGB = (prev. RGB)
+         A = ((tex #4 A) * (prev. A)), then add 255
+    5: RGB = (prev. RGB)
+         A = ((tex #5 A) * (prev. A))
+
+
+
+SC_01_umi_v_x
+=============
+  Textures:
+    - Txa_umi_kiwa_01
+        Offset: 0.3699999749660492, 0
+        Center: 0.5, 0
+        Scale: 2, 3.015493392944336
+    - Txa_umi_kiwa_01
+        Offset: -0.3699999749660492, 0
+        Center: 0.5, 0
+        Scale: 1, 2.300379991531372
+
+  Ambient Colors:
+    - 50, 50, 50, 50
+
+  Color Registers:
+    - 255, 255, 255, 279
+    - 200, 200, 255, 255
+
+  Steps:
+    1: RGB = (0, 0, 0)
+         A = (tex #1 A)
+    2: RGB = (0, 0, 0)
+         A = (tex #2 A), then add (prev. A)
+    3: RGB = (255, 255, 255)
+         A = ((vertex A) * (prev. A))
+
+
+
+lambert114_v_x
+==============
+  Textures:
+    - water_namikage
+
+  Ambient Colors:
+    - 50, 50, 50, 50
+
+  Material Colors:
+    - 204, 204, 204, 255
+    - 204, 204, 204, 255
+
+  Steps:
+    1: RGB = ((tex #1 RGB) * (vertex RGB))
+         A = ((tex #1 A) * (vertex A))
+
+
+
+SC_01_umi_v_x(2)
+================
+  Textures:
+    - Txa_nami_01
+        Offset: -0.3699999749660492, -0.6300000548362732
+    - Txa_nami_01
+        Offset: 0.3699999749660492, -0.6300000548362732
+    - Txa_sirokuro_a
+
+  Ambient Colors:
+    - 50, 50, 50, 50
+
+  Color Registers:
+    - 255, 255, 255, 279
+
+  Steps:
+    1: RGB = (255, 255, 255)
+         A = (tex #1 A)
+    2: RGB = (prev. RGB)
+         A = (tex #2 A), then add (prev. A)
+    3: RGB = (prev. RGB)
+         A = ((tex #3 A) * (prev. A))
+    4: RGB = (prev. RGB)
+         A = ((vertex A) * (prev. A))
+
+
+
+SC_01_umi_v_x(3)
+================
+  Textures:
+    - Txa_umi_kage_01
+        Offset: 0.3699999749660492, -1
+        Center: 0.5, 0
+        Scale: 2, 2.083235263824463
+    - Txa_umi_kage_01
+        Offset: -0.3699999749660492, -1
+        Center: 0.5, 0
+        Scale: 3, 2.166470527648926
+
+  Ambient Colors:
+    - 50, 50, 50, 50
+
+  Constant Colors:
+    - 70, 90, 150, 255
+
+  Color Registers:
+    - 200, 200, 200, 255
+    - 20, 20, 10, 255
+
+  Steps:
+    1: RGB = ((200, 200, 200) * (70, 90, 150))
+         A = (tex #1 A)
+    2: RGB = (prev. RGB)
+         A = (tex #2 A), then add (prev. A)
+
+
+
+SC_01_umi_v(2)
+==============
+  Textures:
+    - Txa_namisoko_ia
+        Offset: 0.6425060629844666, -0.3329407870769501
+        Center: 0.5, 1
+        Scale: 1, 0.5
+    - Txa_namisoko_ia
+        Offset: -0.6425060629844666, -0.3329407870769501
+        Center: 0.5, 1
+    - Txa_sirokuro_a
+
+  Ambient Colors:
+    - 50, 50, 50, 50
+
+  Constant Colors:
+    - 70, 90, 150, 255
+    - 100, 200, 200, 255
+
+  Color Registers:
+    - 100, 200, 200, 255
+
+  Steps:
+    1: RGB = (tex #1 RGB)
+         A = (tex #1 A)
+    2: RGB = (lerp from (tex #2 RGB) to (prev. RGB) using (128, 128, 128))
+         A = ((prev. A) * (tex #2 A))
+    3: RGB = ((prev. RGB) * (tex #3 RGB))
+         A = (prev. A)
+    4: RGB = (100, 200, 200)
+         A = (prev. A)
+
+
+
+SC_01_umi(2)
+============
+  Textures:
+    - Txa_nami_ia
+        Center: 0.5, 0
+        Scale: 1, 0.6674157381057739
+
+  Ambient Colors:
+    - 50, 50, 50, 50
+
+  Constant Colors:
+    - 0, 0, 0, 50
+
+  Material Colors:
+    - 204, 204, 204, 255
+    - 204, 204, 204, 255
+
+  Color Registers:
+    - 0, 0, 0, 255
+
+  Steps:
+    1: RGB = (0, 0, 0)
+         A = (50 * (tex #1 A))
+    2: RGB = -1 * (prev. RGB)
+         A = (prev. A)
