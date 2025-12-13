@@ -8,6 +8,9 @@ in vec3 normal;
 uniform sampler2DArray texArray;
 uniform ivec2 subTexRes[100]; // size should be same as tex array
 
+// uniform int maxTexWidth;
+// uniform int maxTexHeight;
+
 in vec2 texCoord;
 
 struct Material
@@ -78,7 +81,12 @@ vec4 sampleTexArraySubtex(int layer)
 {
     vec2 scale = vec2(subTexRes[layer]) / vec2(4096, 4096); // denominator is the max res of the texture array
     vec2 adjustedTexCoord = texCoord * scale;
-    return texture(texArray, vec3(adjustedTexCoord, float(layer)));
+    vec4 textureColor = texture(texArray, vec3(adjustedTexCoord, float(layer)));
+    if(textureColor.a < 0.5)
+    {
+        discard;
+    }
+    return textureColor;
 }
 
 vec3 calcAmbient(vec3 lightAmbient);

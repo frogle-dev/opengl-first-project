@@ -64,7 +64,6 @@ public:
             return -1;
         }
 
-
         int width, height, numChannels;
         unsigned char *data = stbi_load((directoryPath + "/" + path).c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
 

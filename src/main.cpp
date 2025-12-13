@@ -123,7 +123,7 @@ int main()
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, texArrayID);
 
-    stbi_set_flip_vertically_on_load(true);
+    // stbi_set_flip_vertically_on_load(true);
 
     objectShader.use();
     objectShader.setInt("texArray", 0); // tex array should use tex unit 0
@@ -132,8 +132,10 @@ int main()
     objectShader.setFloat("material.shininess", 128.0f);
 
     // model loading
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
     Model goldOre("../models/Gold_Ore_Block/Gold.obj");
-    Model windfall("../models/Windfall/Windfall.obj");
+    Model windfall("../models/Sponza-master/sponza.obj");
 
     TextureManager::Get().GenerateMipmaps(); // generate texture array mipmaps once all textures have been loaded in
     TextureManager::Get().SendSubTexResArrayToShader(objectShader); // send the tex res array to the frag shader
@@ -327,8 +329,8 @@ int main()
         // }
         
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -2.0f, 2.0f));
-        model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(0.025f, 0.025f, 0.025f));
         objectShader.setMat4("model", model);
         windfall.Draw(objectShader);
 
